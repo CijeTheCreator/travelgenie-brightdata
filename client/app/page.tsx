@@ -1,7 +1,7 @@
 'use client'
 
 import { useChatStore } from "@/stores/chat-store"
-import { useAuth, useUser } from "@clerk/nextjs"
+import { useAuth } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 
