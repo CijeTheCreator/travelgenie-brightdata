@@ -64,7 +64,7 @@ load_dotenv()
 mcp_servers = {
 
     "travelgenie": {
-        "url": "http://localhost:3002/sse",
+        "url": os.getenv("TRAVELGENIE_MCP_URL"),
         "transport": "sse",
     },
 

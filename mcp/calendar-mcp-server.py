@@ -1,3 +1,4 @@
+from typing import Dict, Any, Optional
 from mcp.server.fastmcp import FastMCP
 import argparse
 from utils.helpers import create_ics_file, currency_conversion
@@ -34,9 +35,10 @@ def create_calendar(events: list[dict[str, str | tuple]]) -> str:
     Returns:
         str: The url of the created ICS file (UUID + .ics)
     """
+    file_server_url = os.getenv("FILE_SERVER_URL")
     try:
         ics_file_name = create_ics_file(events)
-        return f"Calendar created at http://localhost:8081/{ics_file_name}"
+        return f"Calendar created at {file_server_url}/{ics_file_name}"
 
     except Exception as e:
         return f"Couldn't create the calendar\n {e}"
@@ -113,7 +115,7 @@ def get_flight_location_code(name: str) -> str:
         name (str): The name of the location to search for (e.g., "madagascar", "paris")
 
     Returns:
-        str: A formatted string containing the location code in the format 
+        str: A formatted string containing the location code in the format
              "The location code is {code}"
 
     Raises:
@@ -281,7 +283,7 @@ def search_hotels(
     Args:
         dest_id (int): Destination ID for the search location
         checkout_date (str): Checkout date in format 'YYYY-MM-DD' (e.g., '2025-10-15')
-        checkin_date (str, optional): Check-in date in format 'YYYY-MM-DD'. 
+        checkin_date (str, optional): Check-in date in format 'YYYY-MM-DD'.
                                      Defaults to '2025-10-14'
         children_number (int, optional): Number of children. Defaults to 1
         adults_number (int, optional): Number of adults. Defaults to 1
@@ -290,7 +292,7 @@ def search_hotels(
 
     Returns:
         str: JSON string containing filtered hotel data for up to 3 results.
-             Each result includes: name, checkin, checkinDate, checkout, 
+             Each result includes: name, checkin, checkinDate, checkout,
              checkoutDate, and priceDetails
 
     Raises:
@@ -429,28 +431,62 @@ def get_city_destination_id(name: str) -> str:
 
 
 @mcp.tool()
-def brightdata_scrape_reddit_location_sentiment(location_code: str) -> Dict[str, any]:
+def brightdata_scrape_reddit_location_sentiment(location: str) -> Dict[str, any]:
     """
     Scrapes Reddit for public sentiment about a given location.
 
     Args:
-        location_code (str): The location code to search for (e.g., "DUB" for Dublin)
+        location (str): The location to search for (eg. Dublin)
 
     Returns:
         summary (str): Summary of sentiment
 
     Raises:
-        ValueError: If location_code is empty or invalid
-        ConnectionError: If Reddit API is unreachable
+        ValueError: If location is empty or invalid
+        ConnectionError: If Brightdata Agent API is unreachable
         RateLimitError: If API rate limits are exceeded
     """
-    # time.sleep(5)
-    return "Visit Dubai between October and April for pleasant weather and vibrant outdoor events. Plan at least five days to explore iconic landmarks, beaches, and local souqs at a relaxed pace. Don’t miss adventures beyond the city like hiking in Hatta or a desert safari in the Dubai Desert Conservation Reserve. Book top activities and restaurants in advance to avoid crowds and secure the best experiences."
+
+    url = os.getenv("BRIGHTDATA_AGENT_URL")
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "message": f"""
+You are a web scraping agent tasked with gathering and analyzing public sentiment about {location} as a tourism destination, using Reddit as the primary data source.
+
+1. Search Reddit for the most recent and relevant posts, comments, and discussions mentioning {location} in the context of travel, tourism, vacations, or visitor experiences.
+
+2. Extract the main text content from each reddit page
+
+3. Analyze the text to identify sentiments about:
+- Accommodation and facilities
+- Local culture and people
+- Safety and accessibility
+- Food and dining experiences
+
+4. Summarize the overall sentiment into a report covering:
+- Most frequently praised aspects
+- Common complaints or warnings
+- General travel advice and tips shared by Reddit users
+- Overall sentiment score or conclusion regarding {location} as a tourism spot
+
+Return the summary as the final output.
+"""
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    if response.ok:
+        response_data = response.json()
+        return response_data.data.response
+    else:
+        return "Failed to fetch location data"
 
 
 @mcp.tool()
 def brightdata_scrape_reddit_activities(
-    location_code: str,
+    location: str,
     subreddit: Optional[str] = None,
     max_posts: int = 100,
     time_filter: str = "month"
@@ -459,7 +495,7 @@ def brightdata_scrape_reddit_activities(
     Scrapes Reddit for activities and things to do in a specified location.
 
     Args:
-        location_code: Location identifier (e.g., city code, postal code, or location name)
+        location(str): The location to search for (eg. Dublin)
         subreddit: Optional specific subreddit to search in (defaults to location-based subreddits)
         max_posts: Maximum number of posts to retrieve (default: 100)
         time_filter: Time period to filter posts ("day", "week", "month", "year", "all")
@@ -468,53 +504,71 @@ def brightdata_scrape_reddit_activities(
         summary (str): Summary of things to do in dubai
 
     Raises:
-        ValueError: If location_code is invalid or empty
+        ValueError: If location is invalid or empty
         ConnectionError: If unable to connect to Reddit API
         RateLimitError: If Reddit API rate limit is exceeded
     """
-    # time.sleep(5)
-    return """Marvel at the iconic Burj Khalifa and enjoy breathtaking views from its sky-high lounges.
+    data = {
+        "message": f"""
+Your task is to gather information about things to do for tourists in {location}.
 
-    Catch the dazzling Dubai Fountain show set to music near the Dubai Mall.
+    Start by searching Reddit for recent and relevant posts, comments, or threads that mention activities, attractions, or recommendations for tourists in {location}.
 
-    Relax or stay at luxury resorts on the man-made Palm Jumeirah island.
+    Extract the URLs of the most relevant Reddit posts (e.g., from subreddits like r/travel, r/solotravel, r/AskReddit, r/CityName, or any other local subreddits).
 
-    Explore heritage at Dubai Creek with a traditional abra ride and bustling souks.
+    For each URL, retrieve the full page content, including the main text of posts and top comments that describe tourist activities or attractions.
 
-    Wander through the Al Fahidi Historical Neighbourhood for a glimpse of old Dubai.
+    Additionally, if available and relevant, collect external links mentioned in those Reddit posts that lead to other tourism-related content.
 
-    Experience thrilling desert safaris, camel rides, and stargazing in the Arabian sands.
+    Summarize the key findings into a concise list of recommended things to do in {location}, emphasizing popular activities and unique local experiences mentioned by Reddit users.
 
+    Return the summary along with the source URLs used for the information.
 """
+    }
 
 
 @mcp.tool()
-def brightdata_get_visa_requirements(
-    origin_country: str,
-    destination_country: str,
-    *,
-    timeout: Optional[int] = 30,
-    headers: Optional[Dict[str, str]] = None
-) -> Dict[str, Union[str, bool, int, None]]:
+def brightdata_get_visa_requirements(passport_country: str, destination_country: str) -> Optional[str]:
     """
     Scrape visa requirements from passportindex.org for travel between two countries.
 
     Args:
-        origin_country: ISO country code or country name for the origin country
-        destination_country: ISO country code or country name for the destination country
-        timeout: Request timeout in seconds (default: 30)
-        headers: Optional HTTP headers for the request
+        passport_country (str): The country code of the passport holder (e.g., 'US', 'NG')
+        destination_country (str): The country code of the destination (e.g., 'BH', 'UK')
 
     Returns:
-        summary (str): Summary of Visa Requirements
-    Raises:
-        ValueError: If country codes are invalid or not found
-        requests.RequestException: If the website cannot be accessed
-        TimeoutError: If the request times out
-        ParseError: If the webpage structure has changed and cannot be parsed
+        Optional[str]: JSON string response from the API, or None if request fails
+
+
     """
-    # time.sleep(5)
-    return "Belgian tourists can enter Dubai without a prior visa and receive a free 90-day multiple-entry visit visa on arrival, valid for 6 months, allowing a total stay of 90 days."
+    # API endpoint and headers
+    url = "https://visa-requirement.p.rapidapi.com/"
+    api_key = os.getenv('RAPIDAPI_KEY')
+    if not api_key:
+        raise KeyError("RAPIDAPI_KEY not found in environment variables")
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'x-rapidapi-host': 'visa-requirement.p.rapidapi.com',
+        'x-rapidapi-key': api_key
+    }
+
+    # Request payload
+    data = {
+        'passport': passport_country.upper(),
+        'destination': destination_country.upper()
+    }
+
+    try:
+        # Make POST request
+        response = requests.post(url, headers=headers, data=data)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+
+        # Return JSON response as string
+        return response.text
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error making API request: {e}")
+        return "Error getting visa details"
 
 
 if __name__ == "__main__":
