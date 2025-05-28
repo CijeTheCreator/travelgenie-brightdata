@@ -17,10 +17,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - CURRENCY_API_KEY=${CURRENCY_API_KEY}
-      - RAPIDAPI_KEY=${RAPIDAPI_KEY}
-      - BRIGHTDATA_AGENT_URL=http://brightdata-agent:5000
-      - FILE_SERVER_URL=http://file-server:3030
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - BROWSER_AUTH=${BROWSER_AUTH}
+      - API_TOKEN=${API_TOKEN}
+      - WEB_UNLOCKER_ZONE=${WEB_UNLOCKER_ZONE}
     depends_on:
       - file-server
     networks:
@@ -32,11 +32,12 @@ services:
     container_name: mcp-service
     ports:
       - "3002:3002"
+      - "3030:3030"  # Add port mapping for file server
     environment:
       - CURRENCY_API_KEY=${CURRENCY_API_KEY}
       - RAPIDAPI_KEY=${RAPIDAPI_KEY}
       - BRIGHTDATA_AGENT_URL=http://brightdata-agent:5000
-      - FILE_SERVER_URL=http://file-server:3030
+      - FILE_SERVER_URL=http://localhost:3030  # Point to localhost since both servers run in same container
     depends_on:
       - brightdata-agent
     networks:
