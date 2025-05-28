@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // It is necessary to send requests from the Next.js backend rather than the client. 
 // This approach prevents exposing the AI service as a public endpoint and eliminates the need to implement authentication logic.
 // The mode elegant way is to use server actions, but it is not possible with streaming response.
+// Good
 
 const AGENT_URL = process.env.NEXT_PUBLIC_AGENT_URL;
 
