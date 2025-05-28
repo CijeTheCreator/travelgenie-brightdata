@@ -21,8 +21,6 @@ services:
       - BROWSER_AUTH=${BROWSER_AUTH}
       - API_TOKEN=${API_TOKEN}
       - WEB_UNLOCKER_ZONE=${WEB_UNLOCKER_ZONE}
-    depends_on:
-      - file-server
     networks:
       - app-network
 
