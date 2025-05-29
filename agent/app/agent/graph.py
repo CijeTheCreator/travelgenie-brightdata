@@ -194,7 +194,6 @@ async def chatbot(state: State):
 
     messages = state["messages"]
     messages = [SystemMessage(system_message)] + messages
-    print(f"chatbot messages: \n{messages}")
     response = await llm.ainvoke(state["messages"])
     return {"messages": [response]}
 
