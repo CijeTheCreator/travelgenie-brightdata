@@ -1,3 +1,4 @@
+import requests
 from flask import Flask, request, jsonify
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -183,6 +184,15 @@ def run_async_chat(user_input):
         raise e
 
 
+def cron_request(endpoint):
+    try:
+        requests.get(endpoint)
+        return "Active"
+
+    except:
+        return "Or not"
+
+
 @app.route('/chat', methods=['POST'])
 def chat_endpoint():
     """Flask endpoint to handle chat requests"""
@@ -267,6 +277,16 @@ def home():
             }
         }
     })
+
+
+@app.route('/cron', methods=['GET'])
+def ping_servers():
+    try:
+        cron_request(os.getenv("AGENT_SERVER"))
+        cron_request(os.getenv("MCP_SERVER"))
+        return "Active"
+    except:
+        return "Active"
 
 
 if __name__ == '__main__':

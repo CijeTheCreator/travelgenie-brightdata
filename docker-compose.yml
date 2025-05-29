@@ -1,16 +1,6 @@
 version: '3.8'
 
 services:
-  # # File Server (starts first as it's needed by others)
-  # file-server:
-  #   build: ./mcp/calendar
-  #   container_name: file-server
-  #   ports:
-  #     - "3030:3030"
-  #   networks:
-  #     - app-network
-  #
-  # BrightData Agent Server (second in startup order)
   brightdata-agent:
     build: ./brightdata_agent_server
     container_name: brightdata-agent
