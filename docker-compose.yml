@@ -1,8 +1,7 @@
 version: '3.8'
-
 services:
   brightdata-agent:
-    build: ./brightdata_agent_server
+    image: legends22/travelgenie-brightdata-agent
     container_name: brightdata-agent
     ports:
       - "5000:5000"
@@ -13,10 +12,10 @@ services:
       - WEB_UNLOCKER_ZONE=${WEB_UNLOCKER_ZONE}
     networks:
       - app-network
-
+  
   # MCP Service (third in startup order)
   mcp:
-    build: ./mcp
+    image: legends22/travelgenie-brightdata-mcp
     container_name: mcp-service
     ports:
       - "3002:3002"
@@ -30,10 +29,10 @@ services:
       - brightdata-agent
     networks:
       - app-network
-
+  
   # Agent Service (fourth in startup order)
   agent:
-    build: ./agent
+    image: legends22/travelgenie-brightdata-brightdata-agent
     container_name: agent-service
     ports:
       - "8000:8000"
@@ -47,7 +46,7 @@ services:
       - mcp
     networks:
       - app-network
-
+  
   # Client Service (last in startup order)
   client:
     build: ./client

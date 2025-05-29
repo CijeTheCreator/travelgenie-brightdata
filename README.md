@@ -10,7 +10,33 @@ An AI-powered agent designed to help tourists plan smarter and cut down trip cos
 - Reddit-powered itinerary planning based on recent tourist experiences  
 - Easy calendar integration (Google Calendar, Spplr, etc.)  
 
-## Installation
+
+## Quickstart
+
+### Host System Package Dependencies
+
+-   Docker
+-   Docker Compose
+
+### After system dependencies are installed, clone this repository:
+
+```sh
+# clone and enter repo
+git clone https://github.com/CijeTheCreator/travelgenie-brightdata
+```
+```sh
+# Start the services
+docker-compose up
+```
+
+The Client will be running on localhost:3000
+The Agent Server will be running on localhost:8000
+The Travel Genie MCP Server will be running on localhost:80/
+The Calendar file server will be running on localhost:3030/calendars/
+The Brightdata Agent will be running on localhost:5000
+
+
+## Installation (If you don't want to use Docker)
 
 ### LangGraph server
 ```bash
