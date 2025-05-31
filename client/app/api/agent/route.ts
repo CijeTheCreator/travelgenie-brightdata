@@ -1,4 +1,8 @@
 export const maxDuration = 300
+export const runtime = 'nodejs';
+// This is required to enable streaming
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 
 
