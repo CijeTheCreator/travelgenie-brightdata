@@ -7,6 +7,9 @@ RUN npm install -g pnpm
 # Set working directory
 WORKDIR /app
 
+# Copy environmental variables files
+COPY .env.production .env
+
 # Copy package files
 COPY package.json pnpm-lock.yaml* ./
 
