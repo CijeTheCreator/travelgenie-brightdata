@@ -26,4 +26,4 @@ RUN pnpm build
 EXPOSE 3000
 
 # Start the production server
-CMD ["node", "server.js"]
+CMD ["npm", "run", "start"]
